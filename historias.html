@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Historias — Matías Sosa Broker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Montserrat:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+  :root{
+    --bg: #10111B;
+    --surface: #191B29;
+    --surface-2: #212436;
+    --line: #2E3247;
+    --cream: #F3F1EA;
+    --cream-dim: #B9B8C4;
+    --signal: #FF5A73;
+    --cyan: #46D9C7;
+    --text: #F3F1EA;
+    --text-dim: #8A8DA3;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:
+      radial-gradient(ellipse 800px 400px at 15% -10%, rgba(255,90,115,0.10), transparent 60%),
+      radial-gradient(ellipse 700px 500px at 100% 0%, rgba(70,217,199,0.07), transparent 55%),
+      #10111B;
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    padding: 28px 20px 60px;
+  }
+  .wrap{ max-width: 1180px; margin: 0 auto; }
+
+  .profile-hero{ display:flex; align-items:center; gap: 18px; margin-bottom: 22px; }
+  .profile-avatar-lg{ width: 76px; height: 76px; border-radius: 50%; overflow: hidden; border: 2px solid var(--signal); flex-shrink:0; background: linear-gradient(135deg, var(--signal), var(--cyan)); }
+  .profile-avatar-lg img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .profile-name-lg{ font-family:'Fraunces', serif; font-size: 26px; font-weight: 600; color: var(--cream); line-height:1.1; }
+  .profile-role-lg{ font-family:'Montserrat', sans-serif; font-size: 12px; color: var(--signal); letter-spacing: .06em; text-transform: uppercase; margin-top: 5px; font-weight:600; }
+
+  header{
+    display:flex; justify-content:space-between; align-items:flex-end; flex-wrap: wrap; gap: 16px;
+    margin-bottom: 28px; border-bottom: 1px solid var(--line); padding-bottom: 20px;
+  }
+  h1{ font-family: 'Fraunces', serif; font-size: 32px; font-weight: 600; letter-spacing: -0.01em; }
+  .subtitle{ color: var(--text-dim); font-size: 13px; margin-top: 6px; font-family: 'Montserrat', sans-serif; }
+
+  .tabnav{ display:flex; gap: 4px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 4px; width: fit-content; margin-top: 16px; }
+  .tabnav a{ font-family: 'Montserrat', sans-serif; font-size: 11px; letter-spacing: 0.03em; padding: 8px 16px; border-radius: 6px; color: var(--text-dim); text-decoration: none; transition: all .15s ease; }
+  .tabnav a:hover{ color: var(--cream); }
+  .tabnav a.active{ background: var(--signal); color: #10111B; font-weight: 600; }
+
+  .btn{
+    background: var(--signal); color: #10111B; border: none; padding: 11px 18px; border-radius: 4px;
+    font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 12px; letter-spacing: 0.02em;
+    cursor: pointer; transition: opacity .15s ease, transform .1s ease;
+  }
+  .btn:hover{ opacity:.88; } .btn:active{ transform: scale(0.98); }
+  .btn.secondary{ background: transparent; border: 1px solid var(--line); color: var(--cream); }
+  .btn.cyan{ background: var(--cyan); }
+  .btn.small{ padding: 7px 12px; font-size: 11px; }
+  .btn:disabled{ opacity:.35; cursor:not-allowed; }
+
+  .editor-layout{ display:grid; grid-template-columns: 220px 1fr 260px; gap: 18px; align-items:start; }
+  @media (max-width: 980px){ .editor-layout{ grid-template-columns: 1fr; } }
+
+  .panel{ background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 16px; }
+  .panel-title{ font-family:'Montserrat', sans-serif; font-size: 11px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color: var(--text-dim); margin-bottom: 12px; }
+
+  /* Lista de secuencias */
+  .seq-item{
+    padding: 10px 12px; border-radius: 4px; margin-bottom: 6px; cursor:pointer;
+    font-size: 13px; color: var(--cream-dim); border: 1px solid transparent;
+    display:flex; justify-content:space-between; align-items:center; gap:6px;
+  }
+  .seq-item:hover{ background: var(--surface-2); }
+  .seq-item.active{ background: rgba(255,90,115,0.1); border-color: var(--signal); color: var(--cream); }
+  .seq-item button{ background:none; border:none; color: var(--text-dim); cursor:pointer; font-size:12px; flex-shrink:0; }
+  .seq-item button:hover{ color: var(--signal); }
+
+  /* Canvas central */
+  .canvas-stage{ display:flex; flex-direction:column; align-items:center; gap: 14px; }
+  .canvas-holder{
+    background: #000; border-radius: 4px; overflow:hidden; box-shadow: 0 0 0 1px var(--line);
+    cursor: default;
+  }
+  #storyCanvas{ display:block; touch-action:none; }
+
+  .slide-thumbs{ display:flex; gap: 8px; flex-wrap:wrap; justify-content:center; }
+  .thumb{
+    width: 44px; height: 78px; border-radius: 3px; border: 2px solid var(--line);
+    cursor: pointer; overflow:hidden; background:#000; position:relative; flex-shrink:0;
+  }
+  .thumb.active{ border-color: var(--signal); }
+  .thumb img{ width:100%; height:100%; object-fit:cover; }
+  .thumb-add{ display:flex; align-items:center; justify-content:center; color: var(--text-dim); font-size:18px; }
+  .thumb-del{
+    position:absolute; top:2px; right:2px; background:rgba(0,0,0,.6); color:#fff; border:none;
+    width:16px; height:16px; font-size:10px; border-radius:50%; cursor:pointer; line-height:1;
+  }
+
+  .field{ margin-bottom: 12px; }
+  .field label{ display:block; font-size: 11px; color: var(--text-dim); margin-bottom: 5px; font-family:'Montserrat',sans-serif; }
+  .field input[type=text], .field input[type=number], .field textarea, .field select{
+    width:100%; background: var(--bg); border: 1px solid var(--line); border-radius: 3px;
+    padding: 8px 10px; color: var(--text); font-size: 13px; font-family: 'Inter', sans-serif;
+  }
+  .field textarea{ min-height: 60px; resize: vertical; }
+  .field input[type=color]{ width:100%; height:34px; border:1px solid var(--line); border-radius:3px; background:var(--bg); cursor:pointer; }
+  .field input:focus, .field textarea:focus{ outline:1px solid var(--signal); border-color:var(--signal); }
+  .row-2{ display:flex; gap:8px; }
+  .row-2 .field{ flex:1; }
+
+  .empty-note{ color: var(--text-dim); font-size:12px; text-align:center; padding: 20px 10px; }
+
+  ::-webkit-scrollbar{ width:8px; height:8px; }
+  ::-webkit-scrollbar-thumb{ background: var(--line); border-radius: 4px; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="profile-hero">
+    <div class="profile-avatar-lg"><img src="data:image/jpeg;base64,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" alt="Matías Sosa"></div>
+    <div>
+      <div class="profile-name-lg">Matías Sosa</div>
+      <div class="profile-role-lg">Broker Inmobiliario · Mar del Plata</div>
+    </div>
+  </div>
+
+  <header>
+    <div>
+      <h1>Historias</h1>
+      <div class="subtitle">Armá secuencias de stories 9:16 con texto e imágenes</div>
+      <nav class="tabnav">
+        <a href="index.html">Dashboard</a>
+        <a href="analisis.html">Análisis de contenido</a>
+        <a href="historias.html" class="active">Historias</a>
+      </nav>
+    </div>
+    <div style="display:flex; gap:8px;">
+      <button class="btn secondary" id="btnConfigSb">Supabase</button>
+      <button class="btn cyan" id="btnExport">⬇ Exportar ZIP</button>
+    </div>
+  </header>
+
+  <div class="editor-layout">
+    <!-- Columna izquierda: lista de secuencias -->
+    <div class="panel">
+      <div class="panel-title">Tus secuencias</div>
+      <div id="seqList"></div>
+      <button class="btn small" style="width:100%; margin-top:8px;" id="btnNewSeq">+ Nueva secuencia</button>
+    </div>
+
+    <!-- Centro: canvas -->
+    <div class="canvas-stage">
+      <input type="text" id="seqName" placeholder="Nombre de la secuencia" style="background:var(--surface); border:1px solid var(--line); color:var(--cream); font-family:'Montserrat',sans-serif; font-size:13px; padding:8px 14px; border-radius:4px; text-align:center; width:280px;">
+      <div class="canvas-holder">
+        <canvas id="storyCanvas" width="1080" height="1920" style="width:243px; height:432px;"></canvas>
+      </div>
+      <div class="slide-thumbs" id="slideThumbs"></div>
+    </div>
+
+    <!-- Columna derecha: controles -->
+    <div class="panel">
+      <div class="panel-title">Fondo del slide</div>
+      <div class="field">
+        <label>Subir imagen</label>
+        <input type="file" id="bgFile" accept="image/*">
+      </div>
+      <div class="field">
+        <label>O color sólido</label>
+        <input type="color" id="bgColor" value="#10111B">
+      </div>
+      <div class="field">
+        <label>Brillo del fondo</label>
+        <input type="range" id="bgBrightness" min="20" max="100" value="100">
+      </div>
+
+      <div class="panel-title" style="margin-top:20px;">Texto</div>
+      <button class="btn small" style="width:100%; margin-bottom:12px;" id="btnAddText">+ Agregar texto</button>
+      <div id="textControls" style="display:none;">
+        <div class="field"><label>Contenido</label><textarea id="txtContent"></textarea></div>
+        <div class="row-2">
+          <div class="field"><label>Tamaño</label><input type="number" id="txtSize" min="16" max="140" value="48"></div>
+          <div class="field"><label>Color</label><input type="color" id="txtColor" value="#F3F1EA"></div>
+        </div>
+        <div class="field">
+          <label>Estilo</label>
+          <select id="txtWeight">
+            <option value="400">Normal</option>
+            <option value="600" selected>Semibold</option>
+            <option value="700">Bold</option>
+          </select>
+        </div>
+        <button class="btn secondary small" style="width:100%;" id="btnDelText">Borrar texto</button>
+      </div>
+      <div class="empty-note" id="noTextNote">Tocá un texto en el lienzo para editarlo, o agregá uno nuevo.</div>
+
+      <div style="margin-top:20px; display:flex; gap:8px;">
+        <button class="btn secondary small" style="flex:1;" id="btnSaveSeq">Guardar</button>
+        <button class="btn secondary small" style="flex:1;" id="btnDelSlide">Borrar slide</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: config supabase -->
+<div class="modal-overlay" id="modalSb" style="position:fixed; inset:0; background:rgba(0,0,0,.6); display:none; align-items:center; justify-content:center; z-index:50; padding:20px;">
+  <div style="background:var(--surface-2); border:1px solid var(--line); border-radius:4px; padding:26px; width:100%; max-width:420px;">
+    <h2 style="font-family:'Fraunces',serif; font-weight:600; font-size:20px; margin-bottom:18px; color:var(--cream);">Conectar Supabase</h2>
+    <div class="field"><label>Project URL</label><input type="text" id="f_sb_url" placeholder="https://xxxx.supabase.co"></div>
+    <div class="field"><label>Anon public key</label><input type="text" id="f_sb_key" placeholder="sb_publishable_..."></div>
+    <div id="sbStatus" style="font-size:12px; margin-top:10px;"></div>
+    <div style="display:flex; gap:10px; margin-top:20px;">
+      <button class="btn secondary" style="flex:1;" id="btnCancelSb">Cancelar</button>
+      <button class="btn" style="flex:1;" id="btnSaveSb">Conectar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let sb = null;
+let sequences = [];
+let currentSeqId = null;
+let currentSlideIdx = 0;
+let selectedTextId = null;
+let dragging = null; // { id, offsetX, offsetY }
+
+const CANVAS_W = 1080, CANVAS_H = 1920;
+const canvas = document.getElementById('storyCanvas');
+const ctx = canvas.getContext('2d');
+
+function newSlide(){
+  return { id: crypto.randomUUID(), bg: { type:'color', value:'#10111B', brightness:100 }, texts: [] };
+}
+function newSequence(){
+  return { id: null, nombre: 'Nueva secuencia', slides: [newSlide()] };
+}
+function currentSeq(){
+  return sequences.find(s => s.id === currentSeqId) || null;
+}
+function currentSlide(){
+  const seq = currentSeq();
+  if(!seq) return null;
+  return seq.slides[currentSlideIdx] || null;
+}
+
+// ---- Supabase connect ----
+function openModal(id){ document.getElementById(id).style.display='flex'; }
+function closeModal(id){ document.getElementById(id).style.display='none'; }
+document.getElementById('btnConfigSb').onclick = () => openModal('modalSb');
+document.getElementById('btnCancelSb').onclick = () => closeModal('modalSb');
+document.getElementById('btnSaveSb').onclick = () => {
+  const url = document.getElementById('f_sb_url').value.trim();
+  const key = document.getElementById('f_sb_key').value.trim();
+  const st = document.getElementById('sbStatus');
+  if(!url||!key){ st.textContent='Completá los dos campos.'; st.style.color='#FF5A73'; return; }
+  try{
+    sb = window.supabase.createClient(url, key);
+    localStorage.setItem('ms_supabase_cfg', JSON.stringify({url,key}));
+    st.textContent='Conectado.'; st.style.color='#46D9C7';
+    loadSequences();
+    setTimeout(()=>closeModal('modalSb'), 600);
+  }catch(e){ st.textContent='Error: '+e.message; st.style.color='#FF5A73'; }
+};
+(function autoConnect(){
+  try{
+    const saved = localStorage.getItem('ms_supabase_cfg');
+    if(saved){ const {url,key} = JSON.parse(saved); if(url&&key){ sb = window.supabase.createClient(url,key); loadSequences(); } }
+  }catch(e){}
+})();
+
+async function loadSequences(){
+  if(!sb) return;
+  const { data, error } = await sb.from('historias_secuencias').select('*').order('updated_at', { ascending:false });
+  if(error){ console.error(error); return; }
+  sequences = (data||[]).map(r => ({ id:r.id, nombre:r.nombre, slides: r.slides && r.slides.length ? r.slides : [newSlide()] }));
+  if(sequences.length === 0){
+    sequences.push(newSequence());
+  }
+  currentSeqId = sequences[0].id;
+  currentSlideIdx = 0;
+  renderSeqList();
+  loadSlideIntoEditor();
+}
+
+function renderSeqList(){
+  const list = document.getElementById('seqList');
+  if(sequences.length === 0){
+    list.innerHTML = '<div class="empty-note">Sin secuencias todavía.</div>';
+    return;
+  }
+  list.innerHTML = sequences.map(s => `
+    <div class="seq-item ${s.id===currentSeqId?'active':''}" data-id="${s.id||''}">
+      <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${s.nombre}</span>
+      <button class="del-seq" data-id="${s.id||''}">✕</button>
+    </div>`).join('');
+  document.querySelectorAll('.seq-item').forEach(el => {
+    el.onclick = (e) => {
+      if(e.target.classList.contains('del-seq')) return;
+      currentSeqId = el.dataset.id || null;
+      currentSlideIdx = 0;
+      loadSlideIntoEditor();
+      renderSeqList();
+    };
+  });
+  document.querySelectorAll('.del-seq').forEach(btn => {
+    btn.onclick = async (e) => {
+      e.stopPropagation();
+      if(!confirm('¿Borrar esta secuencia?')) return;
+      const id = btn.dataset.id;
+      if(id && sb) await sb.from('historias_secuencias').delete().eq('id', id);
+      sequences = sequences.filter(s => s.id !== id);
+      if(sequences.length === 0) sequences.push(newSequence());
+      currentSeqId = sequences[0].id;
+      currentSlideIdx = 0;
+      renderSeqList();
+      loadSlideIntoEditor();
+    };
+  });
+}
+
+document.getElementById('btnNewSeq').onclick = () => {
+  const seq = newSequence();
+  sequences.unshift(seq);
+  currentSeqId = seq.id;
+  currentSlideIdx = 0;
+  renderSeqList();
+  loadSlideIntoEditor();
+};
+
+function loadSlideIntoEditor(){
+  const seq = currentSeq();
+  document.getElementById('seqName').value = seq ? seq.nombre : '';
+  selectedTextId = null;
+  renderThumbs();
+  redrawCanvas();
+  updateTextPanel();
+}
+
+document.getElementById('seqName').oninput = (e) => {
+  const seq = currentSeq();
+  if(seq) seq.nombre = e.target.value;
+  renderSeqList();
+};
+
+// ---- Thumbnails / slides ----
+function renderThumbs(){
+  const seq = currentSeq();
+  const wrap = document.getElementById('slideThumbs');
+  if(!seq){ wrap.innerHTML=''; return; }
+  wrap.innerHTML = seq.slides.map((sl, i) => `
+    <div class="thumb ${i===currentSlideIdx?'active':''}" data-i="${i}" style="background:${sl.bg.type==='color'?sl.bg.value:'#000'};">
+      ${sl.bg.type==='image' ? `<img src="${sl.bg.value}">` : ''}
+      <button class="thumb-del" data-i="${i}">✕</button>
+    </div>
+  `).join('') + `<div class="thumb thumb-add" id="thumbAdd">+</div>`;
+
+  wrap.querySelectorAll('.thumb[data-i]').forEach(el => {
+    el.onclick = (e) => {
+      if(e.target.classList.contains('thumb-del')) return;
+      currentSlideIdx = parseInt(el.dataset.i);
+      selectedTextId = null;
+      renderThumbs(); redrawCanvas(); updateTextPanel();
+    };
+  });
+  wrap.querySelectorAll('.thumb-del').forEach(btn => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      const seq = currentSeq();
+      if(seq.slides.length <= 1) return alert('La secuencia necesita al menos un slide.');
+      seq.slides.splice(parseInt(btn.dataset.i), 1);
+      if(currentSlideIdx >= seq.slides.length) currentSlideIdx = seq.slides.length - 1;
+      renderThumbs(); redrawCanvas(); updateTextPanel();
+    };
+  });
+  document.getElementById('thumbAdd').onclick = () => {
+    const seq = currentSeq(); if(!seq) return;
+    seq.slides.push(newSlide());
+    currentSlideIdx = seq.slides.length - 1;
+    renderThumbs(); redrawCanvas(); updateTextPanel();
+  };
+}
+
+document.getElementById('btnDelSlide').onclick = () => {
+  const seq = currentSeq(); if(!seq) return;
+  if(seq.slides.length <= 1) return alert('La secuencia necesita al menos un slide.');
+  seq.slides.splice(currentSlideIdx, 1);
+  if(currentSlideIdx >= seq.slides.length) currentSlideIdx = seq.slides.length - 1;
+  renderThumbs(); redrawCanvas(); updateTextPanel();
+};
+
+// ---- Background controls ----
+document.getElementById('bgFile').onchange = (e) => {
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    const slide = currentSlide();
+    slide.bg = { type:'image', value: reader.result, brightness: 100 };
+    document.getElementById('bgBrightness').value = 100;
+    redrawCanvas(); renderThumbs();
+  };
+  reader.readAsDataURL(file);
+};
+document.getElementById('bgColor').oninput = (e) => {
+  const slide = currentSlide(); if(!slide) return;
+  slide.bg = { type:'color', value: e.target.value, brightness: 100 };
+  redrawCanvas(); renderThumbs();
+};
+document.getElementById('bgBrightness').oninput = (e) => {
+  const slide = currentSlide(); if(!slide) return;
+  slide.bg.brightness = parseInt(e.target.value);
+  redrawCanvas();
+};
+
+// ---- Text elements ----
+document.getElementById('btnAddText').onclick = () => {
+  const slide = currentSlide(); if(!slide) return;
+  const t = {
+    id: crypto.randomUUID(), content:'Nuevo texto', x: CANVAS_W/2, y: CANVAS_H/2,
+    size: 64, color: '#F3F1EA', weight: '600'
+  };
+  slide.texts.push(t);
+  selectedTextId = t.id;
+  redrawCanvas(); updateTextPanel();
+};
+document.getElementById('btnDelText').onclick = () => {
+  const slide = currentSlide(); if(!slide || !selectedTextId) return;
+  slide.texts = slide.texts.filter(t => t.id !== selectedTextId);
+  selectedTextId = null;
+  redrawCanvas(); updateTextPanel();
+};
+['txtContent','txtSize','txtColor','txtWeight'].forEach(id => {
+  document.getElementById(id).addEventListener('input', () => {
+    const slide = currentSlide(); if(!slide || !selectedTextId) return;
+    const t = slide.texts.find(t => t.id === selectedTextId);
+    if(!t) return;
+    t.content = document.getElementById('txtContent').value;
+    t.size = parseInt(document.getElementById('txtSize').value || '48');
+    t.color = document.getElementById('txtColor').value;
+    t.weight = document.getElementById('txtWeight').value;
+    redrawCanvas();
+  });
+});
+
+function updateTextPanel(){
+  const slide = currentSlide();
+  const t = slide && selectedTextId ? slide.texts.find(x => x.id === selectedTextId) : null;
+  const ctrl = document.getElementById('textControls');
+  const note = document.getElementById('noTextNote');
+  if(t){
+    ctrl.style.display = 'block'; note.style.display = 'none';
+    document.getElementById('txtContent').value = t.content;
+    document.getElementById('txtSize').value = t.size;
+    document.getElementById('txtColor').value = t.color;
+    document.getElementById('txtWeight').value = t.weight;
+  } else {
+    ctrl.style.display = 'none'; note.style.display = 'block';
+  }
+}
+
+// ---- Rendering ----
+function loadImg(src){
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => resolve(null);
+    img.src = src;
+  });
+}
+
+async function drawSlideOnCanvas(slide, targetCtx){
+  targetCtx.clearRect(0,0,CANVAS_W,CANVAS_H);
+  // Background
+  if(slide.bg.type === 'image'){
+    const img = await loadImg(slide.bg.value);
+    if(img){
+      const cw=CANVAS_W, ch=CANVAS_H;
+      const ir = img.width/img.height, cr = cw/ch;
+      let sw,sh,sx,sy;
+      if(ir > cr){ sh = img.height; sw = sh*cr; sx=(img.width-sw)/2; sy=0; }
+      else { sw = img.width; sh = sw/cr; sx=0; sy=(img.height-sh)/2; }
+      targetCtx.drawImage(img, sx, sy, sw, sh, 0, 0, cw, ch);
+    }
+  } else {
+    targetCtx.fillStyle = slide.bg.value;
+    targetCtx.fillRect(0,0,CANVAS_W,CANVAS_H);
+  }
+  // Brightness overlay
+  const b = slide.bg.brightness !== undefined ? slide.bg.brightness : 100;
+  if(b < 100){
+    targetCtx.fillStyle = `rgba(0,0,0,${(100-b)/100 * 0.85})`;
+    targetCtx.fillRect(0,0,CANVAS_W,CANVAS_H);
+  }
+  // Texts
+  slide.texts.forEach(t => {
+    targetCtx.font = `${t.weight} ${t.size}px Montserrat, sans-serif`;
+    targetCtx.fillStyle = t.color;
+    targetCtx.textAlign = 'center';
+    targetCtx.textBaseline = 'middle';
+    const lines = t.content.split('\n');
+    const lineHeight = t.size * 1.25;
+    const totalH = lineHeight * lines.length;
+    lines.forEach((line, i) => {
+      targetCtx.fillText(line, t.x, t.y - totalH/2 + lineHeight*(i+0.5));
+    });
+    if(t.id === selectedTextId){
+      const widths = lines.map(l => targetCtx.measureText(l).width);
+      const w = Math.max(...widths) + 24;
+      targetCtx.strokeStyle = '#FF5A73';
+      targetCtx.lineWidth = 3;
+      targetCtx.setLineDash([10,8]);
+      targetCtx.strokeRect(t.x - w/2, t.y - totalH/2 - 12, w, totalH + 24);
+      targetCtx.setLineDash([]);
+    }
+  });
+}
+
+async function redrawCanvas(){
+  const slide = currentSlide();
+  if(!slide){ ctx.clearRect(0,0,CANVAS_W,CANVAS_H); return; }
+  await drawSlideOnCanvas(slide, ctx);
+}
+
+// ---- Drag & drop de texto en el canvas ----
+function getCanvasCoords(e){
+  const rect = canvas.getBoundingClientRect();
+  const cx = (e.clientX - rect.left) * (CANVAS_W / rect.width);
+  const cy = (e.clientY - rect.top) * (CANVAS_H / rect.height);
+  return { x: cx, y: cy };
+}
+function hitTestText(slide, x, y){
+  for(let i = slide.texts.length - 1; i >= 0; i--){
+    const t = slide.texts[i];
+    ctx.font = `${t.weight} ${t.size}px Montserrat, sans-serif`;
+    const lines = t.content.split('\n');
+    const widths = lines.map(l => ctx.measureText(l).width);
+    const w = Math.max(...widths) + 24;
+    const lineHeight = t.size * 1.25;
+    const h = lineHeight * lines.length + 24;
+    if(x >= t.x - w/2 && x <= t.x + w/2 && y >= t.y - h/2 && y <= t.y + h/2) return t;
+  }
+  return null;
+}
+canvas.addEventListener('mousedown', (e) => {
+  const slide = currentSlide(); if(!slide) return;
+  const { x, y } = getCanvasCoords(e);
+  const hit = hitTestText(slide, x, y);
+  if(hit){
+    selectedTextId = hit.id;
+    dragging = { id: hit.id, offsetX: x - hit.x, offsetY: y - hit.y };
+    updateTextPanel();
+    redrawCanvas();
+  } else {
+    selectedTextId = null;
+    updateTextPanel();
+    redrawCanvas();
+  }
+});
+canvas.addEventListener('mousemove', (e) => {
+  if(!dragging) return;
+  const slide = currentSlide(); if(!slide) return;
+  const t = slide.texts.find(t => t.id === dragging.id);
+  if(!t) return;
+  const { x, y } = getCanvasCoords(e);
+  t.x = Math.max(0, Math.min(CANVAS_W, x - dragging.offsetX));
+  t.y = Math.max(0, Math.min(CANVAS_H, y - dragging.offsetY));
+  redrawCanvas();
+});
+window.addEventListener('mouseup', () => { dragging = null; });
+
+// ---- Guardar en Supabase ----
+document.getElementById('btnSaveSeq').onclick = async () => {
+  if(!sb){ openModal('modalSb'); return; }
+  const seq = currentSeq(); if(!seq) return;
+  const payload = { nombre: seq.nombre, slides: seq.slides, updated_at: new Date().toISOString() };
+  try{
+    if(seq.id){
+      const { error } = await sb.from('historias_secuencias').update(payload).eq('id', seq.id);
+      if(error) throw error;
+    } else {
+      const { data, error } = await sb.from('historias_secuencias').insert(payload).select().single();
+      if(error) throw error;
+      seq.id = data.id;
+      currentSeqId = data.id;
+    }
+    renderSeqList();
+    alert('Guardado.');
+  }catch(e){
+    alert('Error al guardar: ' + e.message);
+  }
+};
+
+// ---- Exportar ZIP ----
+document.getElementById('btnExport').onclick = async () => {
+  const seq = currentSeq(); if(!seq || seq.slides.length === 0) return;
+  const btn = document.getElementById('btnExport');
+  const original = btn.textContent;
+  btn.textContent = 'Generando...'; btn.disabled = true;
+  try{
+    const zip = new JSZip();
+    const off = document.createElement('canvas');
+    off.width = CANVAS_W; off.height = CANVAS_H;
+    const offCtx = off.getContext('2d');
+    const prevSelected = selectedTextId;
+    selectedTextId = null; // no dibujar el recuadro de selección en el export
+    for(let i=0; i<seq.slides.length; i++){
+      await drawSlideOnCanvas(seq.slides[i], offCtx);
+      const blob = await new Promise(res => off.toBlob(res, 'image/png'));
+      zip.file(`${String(i+1).padStart(2,'0')}.png`, blob);
+    }
+    selectedTextId = prevSelected;
+    const content = await zip.generateAsync({ type:'blob' });
+    const url = URL.createObjectURL(content);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${(seq.nombre||'historias').replace(/\s+/g,'_')}.zip`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }catch(e){
+    alert('Error al exportar: ' + e.message);
+  }
+  btn.textContent = original; btn.disabled = false;
+};
+
+// Estado inicial sin Supabase conectado
+if(!sb){
+  sequences = [newSequence()];
+  currentSeqId = sequences[0].id;
+  renderSeqList();
+  loadSlideIntoEditor();
+}
+</script>
+
+</body>
+</html>
