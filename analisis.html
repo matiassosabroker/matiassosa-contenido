@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Análisis de Contenido — Matías Sosa Broker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{
+    --bg: #10111B;
+    --surface: #191B29;
+    --surface-2: #212436;
+    --line: #2E3247;
+    --cream: #F3F1EA;
+    --cream-dim: #B9B8C4;
+    --signal: #FF5A73;
+    --signal-dim: #7A3540;
+    --cyan: #46D9C7;
+    --text: #F3F1EA;
+    --text-dim: #8A8DA3;
+    --up: #46D9C7;
+    --down: #FF5A73;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:
+      radial-gradient(ellipse 800px 400px at 15% -10%, rgba(255,90,115,0.10), transparent 60%),
+      radial-gradient(ellipse 700px 500px at 100% 0%, rgba(70,217,199,0.07), transparent 55%),
+      #10111B;
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    padding: 28px 20px 60px;
+  }
+  .wrap{ max-width: 1080px; margin: 0 auto; }
+
+  header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 28px;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 20px;
+  }
+  .brand-eyebrow{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--signal);
+    font-weight: 500;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .brand-eyebrow::before{
+    content:"";
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--signal);
+    box-shadow: 0 0 0 3px rgba(255,90,115,0.2);
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+  @keyframes pulse-dot{
+    0%, 100% { box-shadow: 0 0 0 3px rgba(255,90,115,0.2); }
+    50% { box-shadow: 0 0 0 6px rgba(255,90,115,0.06); }
+  }
+  h1{
+    font-family: 'Fraunces', serif;
+    font-size: 34px;
+    font-weight: 600;
+    font-style: italic;
+    letter-spacing: -0.01em;
+  }
+  .subtitle{ color: var(--text-dim); font-size: 13px; margin-top: 6px; font-family: 'IBM Plex Mono', monospace; }
+  nav a{ text-decoration:none; }
+
+  .btn{
+    background: var(--signal);
+    color: #10111B;
+    border: none;
+    padding: 11px 18px;
+    border-radius: 3px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition: opacity .15s ease, transform .1s ease;
+  }
+  .btn:hover{ opacity: .88; }
+  .btn:active{ transform: scale(0.98); }
+  .btn.secondary{
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--cream);
+  }
+  .btn.cyan{ background: var(--cyan); }
+  .btn:disabled{ opacity:.4; cursor:not-allowed; }
+
+  .filters{ display:flex; gap:10px; margin-bottom: 20px; flex-wrap:wrap; }
+  .chip{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing:.04em;
+    padding: 7px 14px;
+    border-radius: 3px;
+    border: 1px solid var(--line);
+    color: var(--text-dim);
+    cursor: pointer;
+    background: transparent;
+  }
+  .chip.active{ border-color: var(--signal); color: var(--cream); background: rgba(255,90,115,0.08); }
+
+  .reel-grid{
+    display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 14px;
+  }
+  .reel-card{
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 18px;
+    display:flex;
+    flex-direction:column;
+    gap: 10px;
+  }
+  .reel-top{ display:flex; justify-content:space-between; align-items:flex-start; }
+  .reel-cuenta{ font-family:'IBM Plex Mono', monospace; font-size: 13px; font-weight:600; color: var(--cream); }
+  .badge{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 9px;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    padding: 3px 8px;
+    border-radius: 2px;
+  }
+  .badge.propio{ background: rgba(70,217,199,0.15); color: var(--cyan); }
+  .badge.inspiracion{ background: rgba(255,90,115,0.15); color: var(--signal); }
+  .reel-stats{ display:flex; gap:16px; font-family:'IBM Plex Mono', monospace; font-size: 12px; color: var(--text-dim); }
+  .reel-stats strong{ color: var(--cream); }
+  .reel-fecha{ font-size: 11px; color: var(--text-dim); font-family:'IBM Plex Mono', monospace; }
+
+  .reel-analysis{
+    border-top: 1px solid var(--line);
+    padding-top: 10px;
+    margin-top: 4px;
+    display:none;
+    font-size: 12.5px;
+    line-height: 1.5;
+  }
+  .reel-analysis.open{ display:block; }
+  .reel-analysis h4{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--signal);
+    margin: 10px 0 4px;
+  }
+  .reel-analysis h4:first-child{ margin-top:0; }
+  .reel-analysis p{ color: var(--cream-dim); white-space: pre-wrap; }
+
+  .reel-actions{ display:flex; gap:8px; margin-top:4px; }
+  .reel-actions button{ flex:1; padding:8px; font-size:11px; }
+
+  .empty-state{ text-align:center; padding: 60px 20px; color: var(--text-dim); font-size: 13px; grid-column: 1/-1; }
+
+  /* Modal */
+  .modal-overlay{
+    position: fixed; inset:0; background: rgba(0,0,0,.6);
+    display:none; align-items:center; justify-content:center; z-index: 50; padding: 20px;
+  }
+  .modal-overlay.open{ display:flex; }
+  .modal{
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 26px;
+    width: 100%;
+    max-width: 460px;
+    max-height: 88vh;
+    overflow-y: auto;
+  }
+  .modal h2{ font-family:'Fraunces', serif; font-style: italic; font-weight: 600; font-size:20px; margin-bottom: 18px; color: var(--cream); }
+  .field{ margin-bottom: 14px; }
+  .field label{ display:block; font-size: 12px; color: var(--text-dim); margin-bottom: 6px; }
+  .field input, .field select, .field textarea{
+    width:100%;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 10px 12px;
+    color: var(--text);
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+  }
+  .field textarea{ min-height: 110px; resize: vertical; font-family:'IBM Plex Mono', monospace; font-size:12.5px; }
+  .field input:focus, .field select:focus, .field textarea:focus{ outline: 1px solid var(--signal); border-color: var(--signal); }
+  .modal-actions{ display:flex; gap:10px; margin-top: 20px; }
+  .modal-actions .btn{ flex:1; }
+  .status-msg{ font-size:12px; margin-top:10px; }
+  .status-msg.err{ color: var(--down); }
+  .status-msg.ok{ color: var(--up); }
+  .hint{ font-size: 11px; color: var(--text-dim); margin-top: -8px; margin-bottom: 14px; line-height: 1.4; }
+
+  .spinner{
+    display:inline-block; width:12px; height:12px; border-radius:50%;
+    border: 2px solid rgba(255,255,255,.25); border-top-color: var(--signal);
+    animation: spin .7s linear infinite; margin-right:6px; vertical-align: -2px;
+  }
+  @keyframes spin{ to{ transform: rotate(360deg); } }
+
+  ::-webkit-scrollbar{ width:8px; height:8px; }
+  ::-webkit-scrollbar-thumb{ background: var(--line); border-radius: 4px; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div>
+      <div class="brand-eyebrow">Matías Sosa · Broker Inmobiliario</div>
+      <h1>Análisis de Contenido</h1>
+      <div class="subtitle">Banco de reels propios + inspiración, con análisis IA</div>
+      <nav style="margin-top:14px; display:flex; gap:18px;">
+        <a href="index.html" style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.04em; color:var(--text-dim); padding-bottom:4px; text-decoration:none;">DASHBOARD</a>
+        <a href="analisis.html" style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.04em; color:var(--cream); border-bottom:2px solid var(--signal); padding-bottom:4px; text-decoration:none;">ANÁLISIS DE CONTENIDO</a>
+      </nav>
+    </div>
+    <div style="display:flex; gap:8px;">
+      <button class="btn secondary" id="btnConfigSb">Supabase</button>
+      <button class="btn secondary" id="btnConfigAi">API Claude</button>
+      <button class="btn secondary" id="btnConfigWhisper">API Whisper</button>
+      <button class="btn" id="btnAdd">+ Agregar reel</button>
+    </div>
+  </header>
+
+  <div class="filters">
+    <button class="chip active" data-filter="todos">Todos</button>
+    <button class="chip" data-filter="propio">Propios</button>
+    <button class="chip" data-filter="inspiracion">Inspiración</button>
+  </div>
+
+  <div class="reel-grid" id="reelGrid">
+    <div class="empty-state" id="emptyState">Todavía no cargaste reels. Tocá "+ Agregar reel" para empezar.</div>
+  </div>
+</div>
+
+<!-- Modal: agregar reel -->
+<div class="modal-overlay" id="modalAdd">
+  <div class="modal">
+    <h2>Agregar reel</h2>
+    <div class="field">
+      <label>Tipo</label>
+      <select id="f_tipo">
+        <option value="propio">Propio</option>
+        <option value="inspiracion">Inspiración</option>
+      </select>
+    </div>
+    <div class="field"><label>Cuenta</label><input type="text" id="f_cuenta" placeholder="@matiassosabroker"></div>
+    <div class="field"><label>URL del reel (opcional)</label><input type="text" id="f_url" placeholder="https://instagram.com/reel/..."></div>
+    <div class="field"><label>Vistas</label><input type="number" id="f_vistas" placeholder="15600"></div>
+    <div class="field"><label>Engagement rate (%)</label><input type="number" step="0.01" id="f_er" placeholder="4.5"></div>
+    <div class="field"><label>Fecha</label><input type="date" id="f_fecha"></div>
+    <div class="field">
+      <label>Guion / texto hablado del reel</label>
+      <textarea id="f_guion" placeholder="Pegá acá lo que se dice en el video, tal cual (podés copiarlo de los subtítulos automáticos de Instagram/TikTok), o subí el video abajo para transcribirlo solo."></textarea>
+    </div>
+    <div class="field">
+      <label>O subí el video/audio para transcribir automático</label>
+      <input type="file" id="f_video" accept="video/*,audio/*">
+      <div style="display:flex; align-items:center; gap:10px; margin-top:8px;">
+        <button class="btn secondary" id="btnTranscribir" type="button" style="flex:none;">🎙 Transcribir</button>
+        <span class="status-msg" id="transcribeStatus" style="margin:0;"></span>
+      </div>
+      <div class="hint" style="margin-top:8px;">Archivos de hasta 25MB. Si es más pesado, comprimilo o recortalo antes de subir.</div>
+    </div>
+    <div class="status-msg" id="addStatus"></div>
+    <div class="modal-actions">
+      <button class="btn secondary" id="btnCancelAdd">Cancelar</button>
+      <button class="btn" id="btnSaveAdd">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: config supabase -->
+<div class="modal-overlay" id="modalSb">
+  <div class="modal">
+    <h2>Conectar Supabase</h2>
+    <div class="field"><label>Project URL</label><input type="text" id="f_sb_url" placeholder="https://xxxx.supabase.co"></div>
+    <div class="field"><label>Anon public key</label><input type="text" id="f_sb_key" placeholder="sb_publishable_..."></div>
+    <div class="hint">Usá el mismo proyecto Supabase que ya conectaste en el Dashboard.</div>
+    <div class="status-msg" id="sbStatus"></div>
+    <div class="modal-actions">
+      <button class="btn secondary" id="btnCancelSb">Cancelar</button>
+      <button class="btn" id="btnSaveSb">Conectar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: config API Claude -->
+<div class="modal-overlay" id="modalAi">
+  <div class="modal">
+    <h2>Conectar API de Claude</h2>
+    <div class="field"><label>API Key de Anthropic</label><input type="password" id="f_ai_key" placeholder="sk-ant-..."></div>
+    <div class="hint">La sacás de console.anthropic.com → API Keys. Se guarda solo en este navegador, nunca se envía a ningún otro lado más que a Anthropic directamente. Se paga por uso: cada análisis cuesta centavos de dólar.</div>
+    <div class="status-msg" id="aiStatus"></div>
+    <div class="modal-actions">
+      <button class="btn secondary" id="btnCancelAi">Cancelar</button>
+      <button class="btn cyan" id="btnSaveAi">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: config API Whisper -->
+<div class="modal-overlay" id="modalWhisper">
+  <div class="modal">
+    <h2>Conectar API de Whisper (OpenAI)</h2>
+    <div class="field"><label>API Key de OpenAI</label><input type="password" id="f_whisper_key" placeholder="sk-..."></div>
+    <div class="hint">La sacás de platform.openai.com → API Keys. Necesitás crédito cargado ahí. Se guarda solo en este navegador. Se usa únicamente para transcribir el audio de los videos que subas.</div>
+    <div class="status-msg" id="whisperStatus"></div>
+    <div class="modal-actions">
+      <button class="btn secondary" id="btnCancelWhisper">Cancelar</button>
+      <button class="btn cyan" id="btnSaveWhisper">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let sb = null;
+let aiKey = null;
+let whisperKey = null;
+let reelsCache = [];
+let activeFilter = 'todos';
+
+function openModal(id){ document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+
+// ---- Auto-conectar con lo guardado en el navegador ----
+(function autoConnect(){
+  try{
+    const savedSb = localStorage.getItem('ms_supabase_cfg');
+    if(savedSb){
+      const { url, key } = JSON.parse(savedSb);
+      if(url && key){ sb = window.supabase.createClient(url, key); loadReels(); }
+    }
+  }catch(e){}
+  try{
+    const savedAi = localStorage.getItem('ms_anthropic_key');
+    if(savedAi) aiKey = savedAi;
+  }catch(e){}
+  try{
+    const savedWhisper = localStorage.getItem('ms_openai_key');
+    if(savedWhisper) whisperKey = savedWhisper;
+  }catch(e){}
+})();
+
+// ---- Modales ----
+document.getElementById('btnAdd').onclick = () => {
+  if(!sb){ openModal('modalSb'); return; }
+  document.getElementById('f_fecha').value = new Date().toISOString().slice(0,10);
+  document.getElementById('addStatus').textContent = '';
+  openModal('modalAdd');
+};
+document.getElementById('btnConfigSb').onclick = () => openModal('modalSb');
+document.getElementById('btnConfigAi').onclick = () => openModal('modalAi');
+document.getElementById('btnConfigWhisper').onclick = () => openModal('modalWhisper');
+document.getElementById('btnCancelAdd').onclick = () => closeModal('modalAdd');
+document.getElementById('btnCancelSb').onclick = () => closeModal('modalSb');
+document.getElementById('btnCancelAi').onclick = () => closeModal('modalAi');
+document.getElementById('btnCancelWhisper').onclick = () => closeModal('modalWhisper');
+
+document.getElementById('btnSaveSb').onclick = () => {
+  const url = document.getElementById('f_sb_url').value.trim();
+  const key = document.getElementById('f_sb_key').value.trim();
+  const statusEl = document.getElementById('sbStatus');
+  if(!url || !key){ statusEl.textContent = 'Completá los dos campos.'; statusEl.className = 'status-msg err'; return; }
+  try{
+    sb = window.supabase.createClient(url, key);
+    localStorage.setItem('ms_supabase_cfg', JSON.stringify({ url, key }));
+    statusEl.textContent = 'Conectado.'; statusEl.className = 'status-msg ok';
+    loadReels();
+    setTimeout(()=>closeModal('modalSb'), 600);
+  }catch(e){
+    statusEl.textContent = 'Error: ' + e.message; statusEl.className = 'status-msg err';
+  }
+};
+
+document.getElementById('btnSaveAi').onclick = () => {
+  const key = document.getElementById('f_ai_key').value.trim();
+  const statusEl = document.getElementById('aiStatus');
+  if(!key.startsWith('sk-ant-')){
+    statusEl.textContent = 'La key debería empezar con sk-ant-'; statusEl.className = 'status-msg err'; return;
+  }
+  aiKey = key;
+  localStorage.setItem('ms_anthropic_key', key);
+  statusEl.textContent = 'Guardada.'; statusEl.className = 'status-msg ok';
+  setTimeout(()=>closeModal('modalAi'), 600);
+};
+
+document.getElementById('btnSaveWhisper').onclick = () => {
+  const key = document.getElementById('f_whisper_key').value.trim();
+  const statusEl = document.getElementById('whisperStatus');
+  if(!key.startsWith('sk-')){
+    statusEl.textContent = 'La key debería empezar con sk-'; statusEl.className = 'status-msg err'; return;
+  }
+  whisperKey = key;
+  localStorage.setItem('ms_openai_key', key);
+  statusEl.textContent = 'Guardada.'; statusEl.className = 'status-msg ok';
+  setTimeout(()=>closeModal('modalWhisper'), 600);
+};
+
+document.getElementById('btnTranscribir').onclick = async () => {
+  const statusEl = document.getElementById('transcribeStatus');
+  const fileInput = document.getElementById('f_video');
+  const file = fileInput.files[0];
+  if(!file){ statusEl.textContent = 'Elegí un archivo primero.'; statusEl.className = 'status-msg err'; return; }
+  if(!whisperKey){ closeModal('modalAdd'); openModal('modalWhisper'); return; }
+  if(file.size > 25 * 1024 * 1024){
+    statusEl.textContent = 'El archivo pesa más de 25MB, comprimilo o recortalo.'; statusEl.className = 'status-msg err'; return;
+  }
+  statusEl.textContent = 'Transcribiendo... puede tardar un rato según el largo del video.';
+  statusEl.className = 'status-msg';
+  try{
+    const form = new FormData();
+    form.append('file', file);
+    form.append('model', 'whisper-1');
+    form.append('language', 'es');
+    const res = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + whisperKey },
+      body: form
+    });
+    const data = await res.json();
+    if(data.error) throw new Error(data.error.message);
+    document.getElementById('f_guion').value = data.text || '';
+    statusEl.textContent = 'Listo, revisá el texto abajo.'; statusEl.className = 'status-msg ok';
+  }catch(e){
+    statusEl.textContent = 'Error: ' + e.message; statusEl.className = 'status-msg err';
+  }
+};
+
+document.getElementById('btnSaveAdd').onclick = async () => {
+  const statusEl = document.getElementById('addStatus');
+  const payload = {
+    tipo: document.getElementById('f_tipo').value,
+    cuenta: document.getElementById('f_cuenta').value.trim(),
+    url: document.getElementById('f_url').value.trim() || null,
+    vistas: parseInt(document.getElementById('f_vistas').value || '0'),
+    engagement_rate: parseFloat(document.getElementById('f_er').value || '0'),
+    fecha: document.getElementById('f_fecha').value || null,
+    guion_original: document.getElementById('f_guion').value.trim() || null,
+    analizado: false,
+  };
+  if(!payload.cuenta){ statusEl.textContent = 'Falta la cuenta.'; statusEl.className = 'status-msg err'; return; }
+  statusEl.textContent = 'Guardando...'; statusEl.className = 'status-msg';
+  try{
+    const { error } = await sb.from('reels_analisis').insert(payload);
+    if(error) throw error;
+    statusEl.textContent = 'Guardado.'; statusEl.className = 'status-msg ok';
+    await loadReels();
+    ['f_cuenta','f_url','f_vistas','f_er','f_guion'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('f_video').value = '';
+    document.getElementById('transcribeStatus').textContent = '';
+    setTimeout(()=>closeModal('modalAdd'), 500);
+  }catch(e){
+    statusEl.textContent = 'Error: ' + e.message; statusEl.className = 'status-msg err';
+  }
+};
+
+// ---- Filtros ----
+document.querySelectorAll('.chip').forEach(chip => {
+  chip.onclick = () => {
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    activeFilter = chip.dataset.filter;
+    renderReels();
+  };
+});
+
+function fmt(n){ if(n===null||n===undefined) return '—'; return new Intl.NumberFormat('es-AR').format(n); }
+function fmtDate(d){ if(!d) return '—'; const [y,m,day] = d.split('-'); return `${day}/${m}/${y.slice(2)}`; }
+
+async function loadReels(){
+  if(!sb) return;
+  const { data, error } = await sb.from('reels_analisis').select('*').order('created_at', { ascending: false });
+  if(error){ console.error(error); return; }
+  reelsCache = data || [];
+  renderReels();
+}
+
+function renderReels(){
+  const grid = document.getElementById('reelGrid');
+  const filtered = activeFilter === 'todos' ? reelsCache : reelsCache.filter(r => r.tipo === activeFilter);
+  if(filtered.length === 0){
+    grid.innerHTML = '<div class="empty-state">No hay reels para este filtro.</div>';
+    return;
+  }
+  grid.innerHTML = filtered.map(r => `
+    <div class="reel-card" data-id="${r.id}">
+      <div class="reel-top">
+        <div class="reel-cuenta">${r.cuenta}</div>
+        <span class="badge ${r.tipo}">${r.tipo}</span>
+      </div>
+      <div class="reel-stats">
+        <span>👁 <strong>${fmt(r.vistas)}</strong></span>
+        <span>ER <strong>${r.engagement_rate || 0}%</strong></span>
+      </div>
+      <div class="reel-fecha">${fmtDate(r.fecha)}</div>
+      <div class="reel-actions">
+        ${r.analizado
+          ? `<button class="btn secondary toggle-analysis" data-id="${r.id}">Ver análisis</button>`
+          : `<button class="btn cyan analizar-btn" data-id="${r.id}" ${r.guion_original ? '' : 'disabled title="Falta cargar el guion"'}>✦ Analizar con IA</button>`
+        }
+        <button class="btn secondary borrar-btn" data-id="${r.id}" style="flex:0 0 auto; padding:8px 12px;">✕</button>
+      </div>
+      <div class="reel-analysis" id="analysis-${r.id}">
+        ${r.analizado ? `
+          <h4>CTA</h4><p>${r.cta || '—'}</p>
+          <h4>Puntos de mejora</h4><p>${r.puntos_mejora || '—'}</p>
+          <h4>Transcripción</h4><p>${r.transcripcion_limpia || '—'}</p>
+        ` : ''}
+      </div>
+    </div>
+  `).join('');
+
+  document.querySelectorAll('.toggle-analysis').forEach(btn => {
+    btn.onclick = () => {
+      const el = document.getElementById('analysis-' + btn.dataset.id);
+      el.classList.toggle('open');
+      btn.textContent = el.classList.contains('open') ? 'Ocultar análisis' : 'Ver análisis';
+    };
+  });
+  document.querySelectorAll('.borrar-btn').forEach(btn => {
+    btn.onclick = async () => {
+      if(!confirm('¿Borrar este reel?')) return;
+      await sb.from('reels_analisis').delete().eq('id', btn.dataset.id);
+      loadReels();
+    };
+  });
+  document.querySelectorAll('.analizar-btn').forEach(btn => {
+    btn.onclick = () => analizarReel(btn.dataset.id, btn);
+  });
+}
+
+async function analizarReel(id, btnEl){
+  if(!aiKey){ openModal('modalAi'); return; }
+  const reel = reelsCache.find(r => r.id === id);
+  if(!reel || !reel.guion_original){ alert('Este reel no tiene guion cargado.'); return; }
+
+  const original = btnEl.innerHTML;
+  btnEl.innerHTML = '<span class="spinner"></span>Analizando...';
+  btnEl.disabled = true;
+
+  const prompt = `Sos un estratega de contenido para redes sociales de un broker inmobiliario en Argentina. Te paso el guion de un reel (tipo: ${reel.tipo === 'propio' ? 'reel propio del broker' : 'reel de inspiración de otra cuenta'}, cuenta: ${reel.cuenta}, vistas: ${reel.vistas || 'sin dato'}, ER: ${reel.engagement_rate || 'sin dato'}%).
+
+Guion original:
+"""
+${reel.guion_original}
+"""
+
+Respondé SOLO en formato JSON válido, sin texto antes ni después, con esta estructura exacta:
+{
+  "cta": "análisis del CTA: cuál es, qué tan efectivo es, y una sugerencia concreta de mejora (2-4 líneas)",
+  "puntos_mejora": "2-3 puntos de mejora concretos y accionables, en formato de lista con guiones",
+  "transcripcion_limpia": "el mismo guion pero prolijo: puntuación correcta, párrafos claros, sin cambiar el contenido ni el sentido"
+}
+
+Escribí en español rioplatense, tono directo y práctico, como si le hablaras a un broker inmobiliario que quiere vender más con contenido.`;
+
+  try{
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': aiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-5',
+        max_tokens: 1500,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await res.json();
+    if(data.error) throw new Error(data.error.message);
+    const text = data.content.map(b => b.text || '').join('');
+    const clean = text.replace(/```json|```/g, '').trim();
+    const parsed = JSON.parse(clean);
+
+    const { error } = await sb.from('reels_analisis').update({
+      cta: parsed.cta,
+      puntos_mejora: parsed.puntos_mejora,
+      transcripcion_limpia: parsed.transcripcion_limpia,
+      analizado: true
+    }).eq('id', id);
+    if(error) throw error;
+    await loadReels();
+  }catch(e){
+    alert('Error al analizar: ' + e.message);
+    btnEl.innerHTML = original;
+    btnEl.disabled = false;
+  }
+}
+</script>
+
+</body>
+</html>
