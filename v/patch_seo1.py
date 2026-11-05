@@ -47,5 +47,5 @@ def f_foot(s):
     names={'instagram':'Instagram','facebook':'Facebook','youtube':'YouTube','tiktok':'TikTok','linkedin':'LinkedIn','wa.me':'WhatsApp','whatsapp':'WhatsApp'}
     if not rx.search(s): return None
     return rx.sub(lambda m: m.group(0)+" {!! ("+G+") ? 'aria-label=\""+names[m.group(2)]+"\"' : '' !!}", s)
-patch('front/components/footer.blade.php', f_foot, "aria-label=")
+patch('front/components/footer.blade.php', f_foot, 'aria-label=\"Instagram')
 print('\n'.join(log))
