@@ -2595,5 +2595,8 @@
   "madera": "roble claro",
   "detalles": "negro"
  },
- "referencia": "5 renders de baja calidad aportados por Matias (dormitorio, bano, cocina, estar-comedor)"
+ "referencia": "5 renders de baja calidad aportados por Matias (dormitorio, bano, cocina, estar-comedor)",
+ "patio_interno": {
+  "nota": "El departamento es interno: las ventanas dan a un patio de aire y luz, sin vista (segun Matias). Paredes lisas a ~1,6 m al norte, y a ~3 m al oeste y este de la cocina (estimado)."
+ }
 }
