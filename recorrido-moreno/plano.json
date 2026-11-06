@@ -502,7 +502,7 @@
     3.13,
     3.31
    ],
-   "material": "porcelanato"
+   "material": "porcelanato_gris"
   },
   {
    "id": "bano",
@@ -512,7 +512,7 @@
     3.13,
     4.88
    ],
-   "material": "porcelanato"
+   "material": "porcelanato_gris"
   },
   {
    "id": "hall",
@@ -522,7 +522,7 @@
     4.47,
     4.88
    ],
-   "material": "porcelanato"
+   "material": "porcelanato_gris"
   },
   {
    "id": "cocina",
@@ -532,7 +532,7 @@
     4.7,
     2.67
    ],
-   "material": "porcelanato"
+   "material": "porcelanato_gris"
   },
   {
    "id": "paso",
@@ -542,7 +542,7 @@
     4.96,
     4.88
    ],
-   "material": "porcelanato"
+   "material": "porcelanato_gris"
   },
   {
    "id": "estar_comedor",
@@ -552,7 +552,7 @@
     7.6,
     4.88
    ],
-   "material": "porcelanato"
+   "material": "porcelanato_gris"
   }
  ],
  "techos": [
@@ -2590,7 +2590,7 @@
  ],
  "colores": {
   "muros": "gris claro",
-  "pisos": "porcelanato crema",
+  "pisos": "porcelanato gris claro tipo cemento, mate (muestra de Matias); formato 60x120 estimado",
   "acento": "azul grisaceo (pared cabecera) y azul (cocina, bano)",
   "madera": "roble claro",
   "detalles": "negro"
