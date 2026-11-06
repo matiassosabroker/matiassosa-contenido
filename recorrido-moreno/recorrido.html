@@ -121,7 +121,7 @@ PLANO.muros.forEach(muro);
 const pisoTex = (() => {
   const c = document.createElement('canvas'); c.width = 256; c.height = 512;
   const g = c.getContext('2d'); g.fillStyle = '#b9bbba'; g.fillRect(0, 0, 256, 512);
-  for (let i = 0; i < 2500; i++) { g.fillStyle = Math.random() < 0.5 ? 'rgba(255,255,255,.05)' : 'rgba(70,75,75,.05)'; g.fillRect(Math.random() * 256, Math.random() * 512, 18 + Math.random() * 30, 10 + Math.random() * 24); }
+  for (let i = 0; i < 9000; i++) { g.fillStyle = Math.random() < 0.5 ? 'rgba(255,255,255,.07)' : 'rgba(60,65,65,.07)'; g.fillRect(Math.random() * 256, Math.random() * 512, 1 + Math.random() * 2, 1 + Math.random() * 2); }
   g.fillStyle = '#8d9090'; g.fillRect(253, 0, 3, 512); g.fillRect(0, 509, 256, 3);   // juntas
   const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 4; t.colorSpace = THREE.SRGBColorSpace; return t;
 })();
@@ -186,7 +186,7 @@ for (const [txt, x, z] of PLANO.etiquetas) {
   g.lineWidth = 10; g.strokeStyle = 'rgba(255,255,255,.9)'; g.strokeText(txt, 256, 64); g.fillStyle = '#5a2a14'; g.fillText(txt, 256, 64);
   const tx = new THREE.CanvasTexture(cv); tx.anisotropy = 4;
   const e = new THREE.Mesh(new THREE.PlaneGeometry(2.0, 0.5), new THREE.MeshBasicMaterial({ map: tx, transparent: true, depthWrite: false }));
-  e.rotation.x = -Math.PI / 2; e.position.set(x, 0.03, z); etiquetas.add(e);
+  e.rotation.x = -Math.PI / 2; e.position.set(x, 2.7, z); e.renderOrder = 10; e.material.depthTest = false; etiquetas.add(e);
 }
 
 /* ---------- cámaras ---------- */
