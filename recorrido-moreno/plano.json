@@ -4,45 +4,240 @@
   "unidad": "metros",
   "ejes": "x hacia el este (derecha), y hacia el sur (abajo), z hacia arriba",
   "origen": "esquina exterior noroeste del dormitorio (SUPUESTO, pendiente de OK)",
-  "norte": "SIN DATO: se asume arriba del plano (pendiente)",
+  "norte": "arriba del plano (confirmado por Matias)",
   "escala_control": "cotas coherentes a ~129 px/m; diferencia suma horizontal 7,27 vs medido ~7,40 = ~1,8 % (< 3 %)",
-  "altura_muros": 2.60,
+  "altura_muros": 2.6,
   "altura_muros_nota": "SUPUESTO del prompt, pendiente de OK",
-  "espesor_muros": { "exterior": 0.20, "interior": 0.12, "nota": "ESTIMADO midiendo el dibujo, no acotado" },
+  "espesor_muros": {
+    "exterior": 0.2,
+    "interior": 0.12,
+    "nota": "ESTIMADO midiendo el dibujo, no acotado"
+  },
   "ambientes": [
-    { "id": "dormitorio", "rect": [0.20, 0.21, 3.12, 3.29], "ancho": 2.92, "largo": 3.08, "fuente": "cota" },
-    { "id": "cocina", "rect": [3.10, -0.22, 4.62, 3.14], "ancho": 1.52, "largo": 3.36, "fuente": "cota", "nota": "franja angosta; con saliente al norte que tiene ventana; abierta al hall por abajo" },
-    { "id": "cocina_saliente", "rect": [3.04, -0.97, 4.82, -0.22], "fuente": "medido en dibujo", "nota": "tiene ventana; anafe 4 hornallas" },
-    { "id": "estar", "rect": [4.77, 0.21, 7.60, 2.90], "ancho": 2.83, "largo_total_estar_comedor": 4.73, "fuente": "cota (ancho); largo del estar medido" },
-    { "id": "comedor", "rect": [4.67, 2.90, 7.01, 4.88], "ancho": 2.34, "fuente": "cota (ancho); largo medido" },
-    { "id": "hall", "rect": [3.23, 2.67, 4.47, 4.90], "ancho": 1.24, "largo": 2.23, "fuente": "cota" },
-    { "id": "bano", "rect": [0.83, 3.45, 3.12, 4.92], "ancho": 2.30, "largo": 1.47, "fuente": "cota" }
+    {
+      "id": "dormitorio",
+      "rect": [
+        0.2,
+        0.21,
+        3.12,
+        3.29
+      ],
+      "ancho": 2.92,
+      "largo": 3.08,
+      "fuente": "cota"
+    },
+    {
+      "id": "cocina",
+      "rect": [
+        3.1,
+        -0.22,
+        4.62,
+        3.14
+      ],
+      "ancho": 1.52,
+      "largo": 3.36,
+      "fuente": "cota",
+      "nota": "franja angosta; con saliente al norte que tiene ventana; abierta al hall por abajo"
+    },
+    {
+      "id": "cocina_saliente",
+      "rect": [
+        3.04,
+        -0.97,
+        4.82,
+        -0.22
+      ],
+      "fuente": "medido en dibujo",
+      "nota": "anafe 4 hornallas; ventana encima, sin vista y abierta (espacio exterior de aire y luz, segun Matias)"
+    },
+    {
+      "id": "estar",
+      "rect": [
+        4.77,
+        0.21,
+        7.6,
+        2.9
+      ],
+      "ancho": 2.83,
+      "largo_total_estar_comedor": 4.73,
+      "fuente": "cota (ancho); largo del estar medido"
+    },
+    {
+      "id": "comedor",
+      "rect": [
+        4.67,
+        2.9,
+        7.01,
+        4.88
+      ],
+      "ancho": 2.34,
+      "fuente": "cota (ancho); largo medido"
+    },
+    {
+      "id": "hall",
+      "rect": [
+        3.23,
+        2.67,
+        4.47,
+        4.9
+      ],
+      "ancho": 1.24,
+      "largo": 2.23,
+      "fuente": "cota"
+    },
+    {
+      "id": "bano",
+      "rect": [
+        0.83,
+        3.45,
+        3.12,
+        4.92
+      ],
+      "ancho": 2.3,
+      "largo": 1.47,
+      "fuente": "cota"
+    }
   ],
   "muros_especiales": [
-    { "id": "division_tv", "tipo": "pared entre estar y cocina (va el TV)", "x": [4.68, 4.98], "y": [0.0, 2.67], "fuente": "respuesta de Matias" },
-    { "id": "division_listones", "tipo": "division de listones de madera entre hall y comedor", "x": [4.47, 4.67], "y": [3.45, 4.90], "fuente": "respuesta de Matias" },
-    { "id": "columna", "tipo": "columna", "rect": [7.15, 3.41, 7.60, 4.84], "fuente": "respuesta de Matias; medidas del dibujo" }
+    {
+      "id": "division_tv",
+      "tipo": "pared entre estar y cocina (va el TV)",
+      "x": [
+        4.68,
+        4.98
+      ],
+      "y": [
+        0.0,
+        2.67
+      ],
+      "fuente": "respuesta de Matias"
+    },
+    {
+      "id": "division_listones",
+      "tipo": "division de listones de madera entre hall y comedor",
+      "x": [
+        4.47,
+        4.67
+      ],
+      "y": [
+        3.45,
+        4.9
+      ],
+      "fuente": "respuesta de Matias"
+    },
+    {
+      "id": "columna",
+      "tipo": "columna",
+      "rect": [
+        7.15,
+        3.41,
+        7.6,
+        4.84
+      ],
+      "fuente": "respuesta de Matias; medidas del dibujo"
+    }
   ],
   "aberturas": [
-    { "id": "v_dormitorio", "tipo": "ventana", "muro": "norte", "x": [1.74, 2.88], "ancho": 1.14, "fuente": "medido" },
-    { "id": "v_estar", "tipo": "ventana", "muro": "norte", "x": [4.99, 6.14], "ancho": 1.15, "fuente": "medido" },
-    { "id": "v_cocina", "tipo": "ventana", "muro": "norte de la saliente", "ancho": 1.6, "fuente": "Matias confirma que existe; ancho estimado" },
-    { "id": "p_entrada", "tipo": "puerta", "muro": "sur, en el hall", "x": [3.35, 4.16], "ancho": 0.80, "abre": "hacia adentro (hall), bisagra del lado este", "fuente": "medido; sentido a verificar" },
-    { "id": "p_dormitorio", "tipo": "puerta", "muro": "entre dormitorio y hall", "ancho": 0.75, "abre": "hacia el dormitorio", "fuente": "medido; sentido a verificar" },
-    { "id": "p_bano", "tipo": "puerta", "muro": "entre baño y hall", "ancho": 0.70, "abre": "hacia el baño", "fuente": "medido; sentido a verificar" }
+    {
+      "id": "v_dormitorio",
+      "tipo": "ventana",
+      "muro": "norte",
+      "x": [
+        1.74,
+        2.88
+      ],
+      "ancho": 1.14,
+      "fuente": "medido"
+    },
+    {
+      "id": "v_estar",
+      "tipo": "ventana",
+      "muro": "norte",
+      "x": [
+        4.99,
+        6.14
+      ],
+      "ancho": 1.15,
+      "fuente": "medido"
+    },
+    {
+      "id": "v_cocina",
+      "tipo": "ventana",
+      "muro": "norte de la saliente",
+      "ancho": 1.6,
+      "fuente": "Matias: ventana arriba del artefacto de cocina, sin vista, abierta; ancho estimado"
+    },
+    {
+      "id": "p_entrada",
+      "tipo": "puerta",
+      "muro": "sur, en el hall",
+      "x": [
+        3.35,
+        4.16
+      ],
+      "ancho": 0.8,
+      "abre": "hacia adentro (hall), bisagra del lado este",
+      "fuente": "medido; sentido a verificar"
+    },
+    {
+      "id": "p_dormitorio",
+      "tipo": "puerta",
+      "muro": "entre dormitorio y hall",
+      "ancho": 0.75,
+      "abre": "hacia el dormitorio",
+      "fuente": "medido; sentido a verificar"
+    },
+    {
+      "id": "p_bano",
+      "tipo": "puerta",
+      "muro": "entre baño y hall",
+      "ancho": 0.7,
+      "abre": "hacia el baño",
+      "fuente": "medido; sentido a verificar"
+    }
   ],
   "bano_artefactos": [
-    { "id": "ducha", "rect": [0.83, 3.45, 1.53, 4.92], "nota": "rectangulo de la izquierda, segun Matias" },
-    { "id": "inodoro_y_bidet", "nota": "dos artefactos sobre el muro sur" },
-    { "id": "lavatorio", "nota": "circulo cerca del muro norte, SUPUESTO" }
+    {
+      "id": "ducha",
+      "rect": [
+        0.83,
+        3.45,
+        1.53,
+        4.92
+      ],
+      "nota": "rectangulo de la izquierda, segun Matias"
+    },
+    {
+      "id": "inodoro_y_bidet",
+      "nota": "dos artefactos sobre el muro sur"
+    },
+    {
+      "id": "lavatorio",
+      "nota": "el circulo que se ve en el plano (confirmado por Matias)",
+      "pos": [
+        1.88,
+        3.6
+      ]
+    }
   ],
   "preguntas_abiertas": [
-    "Espesores reales de muro",
-    "Altura de muros (2,60?)",
-    "Cual es el norte",
-    "Origen de coordenadas en la esquina NO del dormitorio",
-    "Que es la franja doble del borde derecho entre estar y comedor (x ~7,0 m)",
-    "Sentido de apertura de las 3 puertas",
-    "Si el baño tiene lavatorio y donde"
-  ]
+    "Espesores reales de muro (se usa 0,20 ext / 0,12 int)",
+    "Altura de muros (se usa 2,60)",
+    "Origen en la esquina NO del dormitorio",
+    "Sentido de apertura de las 3 puertas (hoy: hacia adentro de cada ambiente)"
+  ],
+  "muebles_fijos": [
+    {
+      "id": "escritorio",
+      "junto_a": "sofa, borde derecho del estar",
+      "rect_aprox": [
+        6.76,
+        2.5,
+        7.01,
+        2.91
+      ],
+      "fuente": "Matias; medidas del dibujo, a confirmar"
+    }
+  ],
+  "franja_borde_derecho": "no es nada (Matias): ignorar"
 }
