@@ -101,14 +101,14 @@
   "muros_especiales": [
     {
       "id": "division_tv",
-      "tipo": "pared entre estar y cocina (va el TV)",
+      "tipo": "pared mas corta entre estar y cocina (va el TV); sigue la barra de madera",
       "x": [
         4.68,
         4.98
       ],
       "y": [
         0.0,
-        2.67
+        1.33
       ],
       "fuente": "respuesta de Matias"
     },
@@ -165,7 +165,7 @@
       "tipo": "ventana",
       "muro": "norte de la saliente",
       "ancho": 1.6,
-      "fuente": "Matias: ventana arriba del artefacto de cocina, sin vista, abierta; ancho estimado"
+      "fuente": "Matias: la ventana da toda la vuelta del saliente formando una U (oeste, norte y este)"
     },
     {
       "id": "p_entrada",
@@ -384,14 +384,14 @@
     {
       "id": "division_tv",
       "a": [
-        4.83,
+        4.8,
         0.0
       ],
       "b": [
-        4.83,
-        2.67
+        4.8,
+        1.33
       ],
-      "t": 0.25
+      "t": 0.15
     },
     {
       "id": "saliente_oeste",
@@ -403,7 +403,16 @@
         3.1,
         0.0
       ],
-      "t": 0.12
+      "t": 0.12,
+      "aberturas": [
+        {
+          "tipo": "ventana",
+          "desde": -0.91,
+          "hasta": -0.08,
+          "umbral": 1.0,
+          "dintel": 2.1
+        }
+      ]
     },
     {
       "id": "saliente_este",
@@ -415,7 +424,16 @@
         4.76,
         0.0
       ],
-      "t": 0.12
+      "t": 0.12,
+      "aberturas": [
+        {
+          "tipo": "ventana",
+          "desde": -0.91,
+          "hasta": -0.08,
+          "umbral": 1.0,
+          "dintel": 2.1
+        }
+      ]
     },
     {
       "id": "saliente_norte",
@@ -431,7 +449,7 @@
       "aberturas": [
         {
           "tipo": "ventana",
-          "desde": 3.7,
+          "desde": 3.16,
           "hasta": 4.7,
           "umbral": 1.0,
           "dintel": 2.1
@@ -649,5 +667,18 @@
     ],
     "altura": 1.6,
     "mira": "norte"
-  }
+  },
+  "barras": [
+    {
+      "id": "barra_madera",
+      "rect": [
+        4.68,
+        1.36,
+        4.98,
+        2.67
+      ],
+      "altura": 1.05,
+      "nota": "barra de madera a continuacion del tabique del TV, segun Matias; altura estimada"
+    }
+  ]
 }
