@@ -177,7 +177,8 @@
       ],
       "ancho": 0.8,
       "abre": "hacia adentro (hall), bisagra del lado este",
-      "fuente": "medido; sentido a verificar"
+      "fuente": "medido; sentido a verificar",
+      "nota": "en el modelo la puerta del dormitorio se corta a 2,62-3,29 m (0,67) por la esquina del muro sur"
     },
     {
       "id": "p_dormitorio",
@@ -239,5 +240,414 @@
       "fuente": "Matias; medidas del dibujo, a confirmar"
     }
   ],
-  "franja_borde_derecho": "no es nada (Matias): ignorar"
+  "franja_borde_derecho": "no es nada (Matias): ignorar",
+  "muros": [
+    {
+      "id": "oeste_dorm",
+      "a": [
+        0.105,
+        0.0
+      ],
+      "b": [
+        0.105,
+        3.45
+      ],
+      "t": 0.21
+    },
+    {
+      "id": "norte_dorm",
+      "a": [
+        0.0,
+        0.105
+      ],
+      "b": [
+        3.25,
+        0.105
+      ],
+      "t": 0.21,
+      "aberturas": [
+        {
+          "tipo": "ventana",
+          "desde": 1.74,
+          "hasta": 2.88,
+          "umbral": 1.0,
+          "dintel": 2.1
+        }
+      ]
+    },
+    {
+      "id": "medianera_hall",
+      "a": [
+        3.19,
+        0.0
+      ],
+      "b": [
+        3.19,
+        4.99
+      ],
+      "t": 0.12,
+      "aberturas": [
+        {
+          "tipo": "puerta",
+          "desde": 2.62,
+          "hasta": 3.29,
+          "umbral": 0,
+          "dintel": 2.05
+        },
+        {
+          "tipo": "puerta",
+          "desde": 3.65,
+          "hasta": 4.35,
+          "umbral": 0,
+          "dintel": 2.05
+        }
+      ]
+    },
+    {
+      "id": "sur_dorm",
+      "a": [
+        0.0,
+        3.37
+      ],
+      "b": [
+        3.25,
+        3.37
+      ],
+      "t": 0.16
+    },
+    {
+      "id": "oeste_bano",
+      "a": [
+        0.725,
+        3.3
+      ],
+      "b": [
+        0.725,
+        4.99
+      ],
+      "t": 0.21
+    },
+    {
+      "id": "sur",
+      "a": [
+        0.62,
+        4.985
+      ],
+      "b": [
+        7.81,
+        4.985
+      ],
+      "t": 0.21,
+      "aberturas": [
+        {
+          "tipo": "puerta",
+          "desde": 3.35,
+          "hasta": 4.16,
+          "umbral": 0,
+          "dintel": 2.05
+        }
+      ]
+    },
+    {
+      "id": "este",
+      "a": [
+        7.705,
+        0.0
+      ],
+      "b": [
+        7.705,
+        5.09
+      ],
+      "t": 0.21
+    },
+    {
+      "id": "norte_estar",
+      "a": [
+        4.68,
+        0.105
+      ],
+      "b": [
+        7.81,
+        0.105
+      ],
+      "t": 0.21,
+      "aberturas": [
+        {
+          "tipo": "ventana",
+          "desde": 4.99,
+          "hasta": 6.14,
+          "umbral": 0.9,
+          "dintel": 2.1
+        }
+      ]
+    },
+    {
+      "id": "division_tv",
+      "a": [
+        4.83,
+        0.0
+      ],
+      "b": [
+        4.83,
+        2.67
+      ],
+      "t": 0.25
+    },
+    {
+      "id": "saliente_oeste",
+      "a": [
+        3.1,
+        -1.03
+      ],
+      "b": [
+        3.1,
+        0.0
+      ],
+      "t": 0.12
+    },
+    {
+      "id": "saliente_este",
+      "a": [
+        4.76,
+        -1.03
+      ],
+      "b": [
+        4.76,
+        0.0
+      ],
+      "t": 0.12
+    },
+    {
+      "id": "saliente_norte",
+      "a": [
+        3.04,
+        -0.97
+      ],
+      "b": [
+        4.82,
+        -0.97
+      ],
+      "t": 0.12,
+      "aberturas": [
+        {
+          "tipo": "ventana",
+          "desde": 3.7,
+          "hasta": 4.7,
+          "umbral": 1.0,
+          "dintel": 2.1
+        }
+      ]
+    },
+    {
+      "id": "cierre_cocina",
+      "a": [
+        3.19,
+        2.595
+      ],
+      "b": [
+        3.89,
+        2.595
+      ],
+      "t": 0.15
+    }
+  ],
+  "listones": {
+    "x": [
+      4.47,
+      4.67
+    ],
+    "z": [
+      3.45,
+      4.88
+    ],
+    "paso": 0.15,
+    "espesor": 0.05,
+    "profundidad": 0.18
+  },
+  "columnas": [
+    {
+      "id": "columna",
+      "rect": [
+        7.15,
+        3.41,
+        7.6,
+        4.84
+      ]
+    }
+  ],
+  "pisos": [
+    {
+      "id": "dormitorio",
+      "rect": [
+        0.2,
+        0.21,
+        3.13,
+        3.31
+      ],
+      "material": "madera"
+    },
+    {
+      "id": "bano",
+      "rect": [
+        0.83,
+        3.45,
+        3.13,
+        4.88
+      ],
+      "material": "ceramico_claro"
+    },
+    {
+      "id": "hall",
+      "rect": [
+        3.25,
+        2.67,
+        4.47,
+        4.88
+      ],
+      "material": "madera"
+    },
+    {
+      "id": "cocina",
+      "rect": [
+        3.25,
+        -0.97,
+        4.7,
+        2.67
+      ],
+      "material": "ceramico_gris"
+    },
+    {
+      "id": "paso",
+      "rect": [
+        4.47,
+        2.67,
+        4.96,
+        4.88
+      ],
+      "material": "madera"
+    },
+    {
+      "id": "estar_comedor",
+      "rect": [
+        4.96,
+        0.21,
+        7.6,
+        4.88
+      ],
+      "material": "madera"
+    }
+  ],
+  "techos": [
+    [
+      0.2,
+      0.21,
+      3.13,
+      3.31
+    ],
+    [
+      0.83,
+      3.45,
+      3.13,
+      4.88
+    ],
+    [
+      3.25,
+      2.67,
+      4.47,
+      4.88
+    ],
+    [
+      3.25,
+      0.0,
+      4.7,
+      2.67
+    ],
+    [
+      4.47,
+      2.67,
+      4.96,
+      4.88
+    ],
+    [
+      4.96,
+      0.21,
+      7.6,
+      4.88
+    ]
+  ],
+  "hojas_puerta": [
+    {
+      "id": "entrada",
+      "centro": [
+        4.14,
+        4.575
+      ],
+      "tam": [
+        0.04,
+        0.8
+      ]
+    },
+    {
+      "id": "bano",
+      "centro": [
+        2.84,
+        4.33
+      ],
+      "tam": [
+        0.7,
+        0.04
+      ]
+    },
+    {
+      "id": "dormitorio",
+      "centro": [
+        2.79,
+        3.26
+      ],
+      "tam": [
+        0.68,
+        0.04
+      ]
+    }
+  ],
+  "etiquetas": [
+    [
+      "DORMITORIO",
+      1.66,
+      1.75
+    ],
+    [
+      "COCINA",
+      4.0,
+      1.2
+    ],
+    [
+      "ESTAR",
+      6.3,
+      1.6
+    ],
+    [
+      "COMEDOR",
+      6.0,
+      3.9
+    ],
+    [
+      "HALL",
+      3.85,
+      3.9
+    ],
+    [
+      "BAÑO",
+      1.98,
+      4.2
+    ]
+  ],
+  "camara_inicio": {
+    "pos": [
+      3.755,
+      4.55
+    ],
+    "altura": 1.6,
+    "mira": "norte"
+  }
 }

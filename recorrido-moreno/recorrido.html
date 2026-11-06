@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Recorrido 3D · Dpto Moreno</title>
+<style>
+  :root{--ink:#2b2622;--paper:#f4efe8;--accent:#a8532f}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:#e9e3da;overflow:hidden;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink);touch-action:none;overscroll-behavior:none}
+  canvas{display:block;width:100%;height:100%}
+  #hud{position:fixed;top:max(12px,env(safe-area-inset-top));left:12px;right:12px;display:flex;justify-content:space-between;align-items:center;pointer-events:none;gap:8px}
+  #titulo{background:rgba(244,239,232,.88);padding:8px 12px;border-radius:10px;font-size:13px;line-height:1.2;backdrop-filter:blur(6px)}
+  #titulo b{display:block;font-size:14px}
+  button{pointer-events:auto;font:inherit;font-weight:600;font-size:14px;background:var(--accent);color:#fff;border:0;border-radius:999px;padding:10px 18px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+  #stick{position:fixed;left:max(20px,env(safe-area-inset-left));bottom:max(24px,env(safe-area-inset-bottom));width:120px;height:120px;border-radius:50%;background:rgba(244,239,232,.55);border:2px solid rgba(43,38,34,.35)}
+  #knob{position:absolute;left:35px;top:35px;width:50px;height:50px;border-radius:50%;background:rgba(168,83,47,.85)}
+  #ayuda{position:fixed;right:12px;bottom:max(24px,env(safe-area-inset-bottom));font-size:12px;background:rgba(244,239,232,.8);padding:6px 10px;border-radius:8px;max-width:50vw;text-align:right}
+  #err{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:24px;text-align:center;background:var(--paper)}
+</style>
+<script type="importmap">
+{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" } }
+</script>
+</head>
+<body>
+<div id="hud">
+  <div id="titulo"><b>Dpto Moreno</b>Recorrido 3D · escala 1:1 m</div>
+  <button id="btnVista">Planta</button>
+</div>
+<div id="stick"><div id="knob"></div></div>
+<div id="ayuda">Arrastrá para mirar · joystick o WASD para caminar</div>
+<div id="err">No se pudo cargar el visor 3D. Revisá la conexión y recargá la página.</div>
+
+<script type="application/json" id="plano-data">
+{"propiedad": "DPTO MORENO", "fuente": "Plano ARQ, planta, esc. 1:100, 23/09/2026 (Arq. Santanatoglia)", "unidad": "metros", "ejes": "x hacia el este (derecha), y hacia el sur (abajo), z hacia arriba", "origen": "esquina exterior noroeste del dormitorio (SUPUESTO, pendiente de OK)", "norte": "arriba del plano (confirmado por Matias)", "escala_control": "cotas coherentes a ~129 px/m; diferencia suma horizontal 7,27 vs medido ~7,40 = ~1,8 % (< 3 %)", "altura_muros": 2.6, "altura_muros_nota": "SUPUESTO del prompt, pendiente de OK", "espesor_muros": {"exterior": 0.2, "interior": 0.12, "nota": "ESTIMADO midiendo el dibujo, no acotado"}, "ambientes": [{"id": "dormitorio", "rect": [0.2, 0.21, 3.12, 3.29], "ancho": 2.92, "largo": 3.08, "fuente": "cota"}, {"id": "cocina", "rect": [3.1, -0.22, 4.62, 3.14], "ancho": 1.52, "largo": 3.36, "fuente": "cota", "nota": "franja angosta; con saliente al norte que tiene ventana; abierta al hall por abajo"}, {"id": "cocina_saliente", "rect": [3.04, -0.97, 4.82, -0.22], "fuente": "medido en dibujo", "nota": "anafe 4 hornallas; ventana encima, sin vista y abierta (espacio exterior de aire y luz, segun Matias)"}, {"id": "estar", "rect": [4.77, 0.21, 7.6, 2.9], "ancho": 2.83, "largo_total_estar_comedor": 4.73, "fuente": "cota (ancho); largo del estar medido"}, {"id": "comedor", "rect": [4.67, 2.9, 7.01, 4.88], "ancho": 2.34, "fuente": "cota (ancho); largo medido"}, {"id": "hall", "rect": [3.23, 2.67, 4.47, 4.9], "ancho": 1.24, "largo": 2.23, "fuente": "cota"}, {"id": "bano", "rect": [0.83, 3.45, 3.12, 4.92], "ancho": 2.3, "largo": 1.47, "fuente": "cota"}], "muros_especiales": [{"id": "division_tv", "tipo": "pared entre estar y cocina (va el TV)", "x": [4.68, 4.98], "y": [0.0, 2.67], "fuente": "respuesta de Matias"}, {"id": "division_listones", "tipo": "division de listones de madera entre hall y comedor", "x": [4.47, 4.67], "y": [3.45, 4.9], "fuente": "respuesta de Matias"}, {"id": "columna", "tipo": "columna", "rect": [7.15, 3.41, 7.6, 4.84], "fuente": "respuesta de Matias; medidas del dibujo"}], "aberturas": [{"id": "v_dormitorio", "tipo": "ventana", "muro": "norte", "x": [1.74, 2.88], "ancho": 1.14, "fuente": "medido"}, {"id": "v_estar", "tipo": "ventana", "muro": "norte", "x": [4.99, 6.14], "ancho": 1.15, "fuente": "medido"}, {"id": "v_cocina", "tipo": "ventana", "muro": "norte de la saliente", "ancho": 1.6, "fuente": "Matias: ventana arriba del artefacto de cocina, sin vista, abierta; ancho estimado"}, {"id": "p_entrada", "tipo": "puerta", "muro": "sur, en el hall", "x": [3.35, 4.16], "ancho": 0.8, "abre": "hacia adentro (hall), bisagra del lado este", "fuente": "medido; sentido a verificar", "nota": "en el modelo la puerta del dormitorio se corta a 2,62-3,29 m (0,67) por la esquina del muro sur"}, {"id": "p_dormitorio", "tipo": "puerta", "muro": "entre dormitorio y hall", "ancho": 0.75, "abre": "hacia el dormitorio", "fuente": "medido; sentido a verificar"}, {"id": "p_bano", "tipo": "puerta", "muro": "entre baño y hall", "ancho": 0.7, "abre": "hacia el baño", "fuente": "medido; sentido a verificar"}], "bano_artefactos": [{"id": "ducha", "rect": [0.83, 3.45, 1.53, 4.92], "nota": "rectangulo de la izquierda, segun Matias"}, {"id": "inodoro_y_bidet", "nota": "dos artefactos sobre el muro sur"}, {"id": "lavatorio", "nota": "el circulo que se ve en el plano (confirmado por Matias)", "pos": [1.88, 3.6]}], "preguntas_abiertas": ["Espesores reales de muro (se usa 0,20 ext / 0,12 int)", "Altura de muros (se usa 2,60)", "Origen en la esquina NO del dormitorio", "Sentido de apertura de las 3 puertas (hoy: hacia adentro de cada ambiente)"], "muebles_fijos": [{"id": "escritorio", "junto_a": "sofa, borde derecho del estar", "rect_aprox": [6.76, 2.5, 7.01, 2.91], "fuente": "Matias; medidas del dibujo, a confirmar"}], "franja_borde_derecho": "no es nada (Matias): ignorar", "muros": [{"id": "oeste_dorm", "a": [0.105, 0.0], "b": [0.105, 3.45], "t": 0.21}, {"id": "norte_dorm", "a": [0.0, 0.105], "b": [3.25, 0.105], "t": 0.21, "aberturas": [{"tipo": "ventana", "desde": 1.74, "hasta": 2.88, "umbral": 1.0, "dintel": 2.1}]}, {"id": "medianera_hall", "a": [3.19, 0.0], "b": [3.19, 4.99], "t": 0.12, "aberturas": [{"tipo": "puerta", "desde": 2.62, "hasta": 3.29, "umbral": 0, "dintel": 2.05}, {"tipo": "puerta", "desde": 3.65, "hasta": 4.35, "umbral": 0, "dintel": 2.05}]}, {"id": "sur_dorm", "a": [0.0, 3.37], "b": [3.25, 3.37], "t": 0.16}, {"id": "oeste_bano", "a": [0.725, 3.3], "b": [0.725, 4.99], "t": 0.21}, {"id": "sur", "a": [0.62, 4.985], "b": [7.81, 4.985], "t": 0.21, "aberturas": [{"tipo": "puerta", "desde": 3.35, "hasta": 4.16, "umbral": 0, "dintel": 2.05}]}, {"id": "este", "a": [7.705, 0.0], "b": [7.705, 5.09], "t": 0.21}, {"id": "norte_estar", "a": [4.68, 0.105], "b": [7.81, 0.105], "t": 0.21, "aberturas": [{"tipo": "ventana", "desde": 4.99, "hasta": 6.14, "umbral": 0.9, "dintel": 2.1}]}, {"id": "division_tv", "a": [4.83, 0.0], "b": [4.83, 2.67], "t": 0.25}, {"id": "saliente_oeste", "a": [3.1, -1.03], "b": [3.1, 0.0], "t": 0.12}, {"id": "saliente_este", "a": [4.76, -1.03], "b": [4.76, 0.0], "t": 0.12}, {"id": "saliente_norte", "a": [3.04, -0.97], "b": [4.82, -0.97], "t": 0.12, "aberturas": [{"tipo": "ventana", "desde": 3.7, "hasta": 4.7, "umbral": 1.0, "dintel": 2.1}]}, {"id": "cierre_cocina", "a": [3.19, 2.595], "b": [3.89, 2.595], "t": 0.15}], "listones": {"x": [4.47, 4.67], "z": [3.45, 4.88], "paso": 0.15, "espesor": 0.05, "profundidad": 0.18}, "columnas": [{"id": "columna", "rect": [7.15, 3.41, 7.6, 4.84]}], "pisos": [{"id": "dormitorio", "rect": [0.2, 0.21, 3.13, 3.31], "material": "madera"}, {"id": "bano", "rect": [0.83, 3.45, 3.13, 4.88], "material": "ceramico_claro"}, {"id": "hall", "rect": [3.25, 2.67, 4.47, 4.88], "material": "madera"}, {"id": "cocina", "rect": [3.25, -0.97, 4.7, 2.67], "material": "ceramico_gris"}, {"id": "paso", "rect": [4.47, 2.67, 4.96, 4.88], "material": "madera"}, {"id": "estar_comedor", "rect": [4.96, 0.21, 7.6, 4.88], "material": "madera"}], "techos": [[0.2, 0.21, 3.13, 3.31], [0.83, 3.45, 3.13, 4.88], [3.25, 2.67, 4.47, 4.88], [3.25, 0.0, 4.7, 2.67], [4.47, 2.67, 4.96, 4.88], [4.96, 0.21, 7.6, 4.88]], "hojas_puerta": [{"id": "entrada", "centro": [4.14, 4.575], "tam": [0.04, 0.8]}, {"id": "bano", "centro": [2.84, 4.33], "tam": [0.7, 0.04]}, {"id": "dormitorio", "centro": [2.79, 3.26], "tam": [0.68, 0.04]}], "etiquetas": [["DORMITORIO", 1.66, 1.75], ["COCINA", 4.0, 1.2], ["ESTAR", 6.3, 1.6], ["COMEDOR", 6.0, 3.9], ["HALL", 3.85, 3.9], ["BAÑO", 1.98, 4.2]], "camara_inicio": {"pos": [3.755, 4.55], "altura": 1.6, "mira": "norte"}}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+
+const PLANO = JSON.parse(document.getElementById('plano-data').textContent);
+const H = PLANO.altura_muros;            // altura de muros (m)
+const colliders = [];                     // [x0,z0,x1,z1] en metros (x este, z sur)
+
+/* ---------- escena, render, luz ---------- */
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xdde4ea);
+const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFShadowMap;
+document.body.prepend(renderer.domElement);
+
+const cx = 3.9, cz = 2.0;
+scene.add(new THREE.AmbientLight(0xffffff, 1.05));
+const sol = new THREE.DirectionalLight(0xfff3e0, 0.7);   // una sola luz con sombra
+sol.position.set(cx + 2, 12, cz + 1.5);
+sol.target.position.set(cx, 0, cz);
+sol.castShadow = true;
+sol.shadow.mapSize.set(1024, 1024);
+Object.assign(sol.shadow.camera, { left: -7, right: 7, top: 6, bottom: -6, near: 1, far: 30 });
+sol.shadow.bias = -0.0006;
+scene.add(sol, sol.target);
+
+/* ---------- materiales ---------- */
+const mat = c => new THREE.MeshLambertMaterial({ color: c });
+const M = {
+  muro: mat(0xede8df), madera: mat(0xc9a27a), ceramico_claro: mat(0xd8d4cc),
+  ceramico_gris: mat(0xb9b6af), techo: mat(0xf7f4ef), hoja: mat(0x8a6a4a),
+  liston: mat(0xb98b5a), columna: mat(0xe3ddd2), suelo: mat(0xbdb5a6)
+};
+const vidrio = new THREE.MeshBasicMaterial({ color: 0xbfd8e6, transparent: true, opacity: 0.22, side: THREE.DoubleSide, depthWrite: false });
+
+const box = (w, h, d, m, x, y, z, sombra = true) => {
+  const o = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m);
+  o.position.set(x, y, z); o.castShadow = sombra; o.receiveShadow = true; scene.add(o); return o;
+};
+
+/* suelo exterior (para el patio abierto de la cocina) */
+const ext = new THREE.Mesh(new THREE.PlaneGeometry(60, 60), M.suelo);
+ext.rotation.x = -Math.PI / 2; ext.position.set(cx, -0.02, cz); ext.receiveShadow = true; scene.add(ext);
+
+/* ---------- muros extruidos con vanos recortados ---------- */
+function muro(w) {
+  const [x1, z1] = w.a, [x2, z2] = w.b;
+  const horiz = Math.abs(z1 - z2) < 1e-6;               // corre a lo largo de x
+  const s0 = horiz ? Math.min(x1, x2) : Math.min(z1, z2);
+  const s1 = horiz ? Math.max(x1, x2) : Math.max(z1, z2);
+  const c = horiz ? z1 : x1, t = w.t;
+  const tramo = (a, b, y0, y1, macizo) => {
+    if (b - a < 1e-4 || y1 - y0 < 1e-4) return;
+    const m = (a + b) / 2, y = (y0 + y1) / 2;
+    if (horiz) box(b - a, y1 - y0, t, M.muro, m, y, c); else box(t, y1 - y0, b - a, M.muro, c, y, m);
+    if (macizo) colliders.push(horiz ? [a, c - t / 2, b, c + t / 2] : [c - t / 2, a, c + t / 2, b]);
+  };
+  let cur = s0;
+  for (const o of (w.aberturas || []).slice().sort((p, q) => p.desde - q.desde)) {
+    tramo(cur, o.desde, 0, H, true);                    // muro hasta el vano
+    tramo(o.desde, o.hasta, 0, o.umbral, o.umbral > 0); // antepecho (ventanas)
+    tramo(o.desde, o.hasta, o.dintel, H, false);        // dintel
+    if (o.tipo === 'ventana') {                         // vidrio
+      const g = new THREE.Mesh(horiz ? new THREE.PlaneGeometry(o.hasta - o.desde, o.dintel - o.umbral)
+                                     : new THREE.PlaneGeometry(o.hasta - o.desde, o.dintel - o.umbral), vidrio);
+      g.position.set(horiz ? (o.desde + o.hasta) / 2 : c, (o.umbral + o.dintel) / 2, horiz ? c : (o.desde + o.hasta) / 2);
+      if (!horiz) g.rotation.y = Math.PI / 2;
+      scene.add(g);
+    }
+    cur = o.hasta;
+  }
+  tramo(cur, s1, 0, H, true);
+}
+PLANO.muros.forEach(muro);
+
+/* ---------- pisos y techos ---------- */
+for (const p of PLANO.pisos) {
+  const [x0, z0, x1, z1] = p.rect;
+  const f = new THREE.Mesh(new THREE.PlaneGeometry(x1 - x0, z1 - z0), M[p.material]);
+  f.rotation.x = -Math.PI / 2; f.position.set((x0 + x1) / 2, 0.005, (z0 + z1) / 2); f.receiveShadow = true; scene.add(f);
+}
+const techos = [];
+for (const [x0, z0, x1, z1] of PLANO.techos) {
+  const t = new THREE.Mesh(new THREE.PlaneGeometry(x1 - x0, z1 - z0), M.techo);
+  t.rotation.x = Math.PI / 2; t.position.set((x0 + x1) / 2, H, (z0 + z1) / 2);   // mira hacia abajo
+  scene.add(t); techos.push(t);                                                  // no proyecta sombra
+}
+
+/* ---------- listones, columna, hojas de puerta ---------- */
+{
+  const L = PLANO.listones, xm = (L.x[0] + L.x[1]) / 2;
+  for (let z = L.z[0] + L.espesor / 2; z <= L.z[1]; z += L.paso)
+    box(L.profundidad, H, L.espesor, M.liston, xm, H / 2, z);
+  colliders.push([L.x[0], L.z[0], L.x[1], L.z[1]]);
+  for (const c of PLANO.columnas) {
+    const [x0, z0, x1, z1] = c.rect;
+    box(x1 - x0, H, z1 - z0, M.columna, (x0 + x1) / 2, H / 2, (z0 + z1) / 2);
+    colliders.push(c.rect);
+  }
+  for (const h of PLANO.hojas_puerta)
+    box(h.tam[0], 2.0, h.tam[1], M.hoja, h.centro[0], 1.0, h.centro[1]);
+}
+
+/* ---------- etiquetas (solo en vista Planta) ---------- */
+const etiquetas = new THREE.Group(); etiquetas.visible = false; scene.add(etiquetas);
+for (const [txt, x, z] of PLANO.etiquetas) {
+  const cv = document.createElement('canvas'); cv.width = 512; cv.height = 128;
+  const g = cv.getContext('2d'); g.font = '600 64px system-ui,sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.lineWidth = 10; g.strokeStyle = 'rgba(255,255,255,.9)'; g.strokeText(txt, 256, 64); g.fillStyle = '#5a2a14'; g.fillText(txt, 256, 64);
+  const tx = new THREE.CanvasTexture(cv); tx.anisotropy = 4;
+  const e = new THREE.Mesh(new THREE.PlaneGeometry(2.0, 0.5), new THREE.MeshBasicMaterial({ map: tx, transparent: true, depthWrite: false }));
+  e.rotation.x = -Math.PI / 2; e.position.set(x, 0.03, z); etiquetas.add(e);
+}
+
+/* ---------- cámaras ---------- */
+const cam = new THREE.PerspectiveCamera(70, 1, 0.05, 80);
+cam.rotation.order = 'YXZ';
+let yaw = 0, pitch = 0;
+cam.position.set(PLANO.camara_inicio.pos[0], PLANO.camara_inicio.altura, PLANO.camara_inicio.pos[1]); // puerta de entrada, 1,60 m
+
+const top = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 60);
+top.up.set(0, 0, -1);                         // norte arriba
+top.position.set(cx, 30, cz - 0.1); top.lookAt(cx, 0, cz - 0.1);
+const BOX = { w: 8.6, h: 6.9 };               // encuadre de la planta (m)
+
+let vista = 'recorrido';
+const btn = document.getElementById('btnVista'), stick = document.getElementById('stick'), ayuda = document.getElementById('ayuda');
+function setVista(v) {
+  vista = v;
+  const p = v === 'planta';
+  techos.forEach(t => t.visible = !p);
+  etiquetas.visible = p;
+  stick.style.display = ayuda.style.display = p ? 'none' : '';
+  btn.textContent = p ? 'Recorrido' : 'Planta';
+}
+btn.addEventListener('click', () => setVista(vista === 'planta' ? 'recorrido' : 'planta'));
+btn.addEventListener('pointerdown', e => e.stopPropagation());
+
+function resize() {
+  const w = innerWidth, h = innerHeight, a = w / h;
+  renderer.setSize(w, h, false);
+  cam.aspect = a; cam.updateProjectionMatrix();
+  const hh = Math.max(BOX.h, BOX.w / a) / 2, hw = hh * a;
+  Object.assign(top, { left: -hw, right: hw, top: hh, bottom: -hh }); top.updateProjectionMatrix();
+}
+addEventListener('resize', resize); resize();
+
+/* ---------- controles: mirar arrastrando, caminar con joystick o teclado ---------- */
+const keys = {}; addEventListener('keydown', e => keys[e.code] = true); addEventListener('keyup', e => keys[e.code] = false);
+let look = null;
+renderer.domElement.addEventListener('pointerdown', e => { if (vista === 'recorrido') look = { id: e.pointerId, x: e.clientX, y: e.clientY }; });
+addEventListener('pointermove', e => {
+  if (look && e.pointerId === look.id) {
+    yaw -= (e.clientX - look.x) * 0.005;
+    pitch = Math.max(-1.2, Math.min(1.2, pitch - (e.clientY - look.y) * 0.005));
+    look.x = e.clientX; look.y = e.clientY;
+  }
+  if (js && e.pointerId === js.id) {
+    const r = stick.getBoundingClientRect(), R = r.width / 2;
+    let dx = e.clientX - (r.left + R), dy = e.clientY - (r.top + R);
+    const d = Math.hypot(dx, dy); if (d > R) { dx *= R / d; dy *= R / d; }
+    jv.x = dx / R; jv.y = -dy / R;
+    knob.style.transform = `translate(${dx}px,${dy}px)`;
+  }
+});
+const end = e => { if (look && e.pointerId === look.id) look = null; if (js && e.pointerId === js.id) { js = null; jv.x = jv.y = 0; knob.style.transform = ''; } };
+addEventListener('pointerup', end); addEventListener('pointercancel', end);
+const knob = document.getElementById('knob'); let js = null; const jv = { x: 0, y: 0 };
+stick.addEventListener('pointerdown', e => { js = { id: e.pointerId }; e.stopPropagation(); stick.setPointerCapture?.(e.pointerId); });
+
+const RADIO = 0.22;                                   // radio del cuerpo (m)
+const choca = (x, z) => colliders.some(c => x > c[0] - RADIO && x < c[2] + RADIO && z > c[1] - RADIO && z < c[3] + RADIO);
+
+let t0 = performance.now();
+renderer.setAnimationLoop(now => {
+  const dt = Math.min((now - t0) / 1000, 0.05); t0 = now;
+  if (vista === 'recorrido') {
+    let f = jv.y + (keys.KeyW || keys.ArrowUp ? 1 : 0) - (keys.KeyS || keys.ArrowDown ? 1 : 0);
+    let s = jv.x + (keys.KeyD ? 1 : 0) - (keys.KeyA ? 1 : 0);
+    if (keys.ArrowLeft) yaw += 1.8 * dt; if (keys.ArrowRight) yaw -= 1.8 * dt;
+    const n = Math.hypot(f, s); if (n > 1) { f /= n; s /= n; }
+    const v = 1.6 * dt;
+    const dx = (-Math.sin(yaw) * f + Math.cos(yaw) * s) * v, dz = (-Math.cos(yaw) * f - Math.sin(yaw) * s) * v;
+    if (!choca(cam.position.x + dx, cam.position.z)) cam.position.x += dx;   // desliza por los muros
+    if (!choca(cam.position.x, cam.position.z + dz)) cam.position.z += dz;
+    cam.rotation.set(pitch, yaw, 0);
+    renderer.render(scene, cam);
+  } else renderer.render(scene, top);
+});
+window.__recorrido = { setVista, cam, get yaw() { return yaw; }, set yaw(v) { yaw = v; }, set pitch(v) { pitch = v; } };
+</script>
+<script>
+  // si el módulo no carga (sin conexión a jsDelivr), avisar
+  addEventListener('error', e => { if (e.target && e.target.tagName === 'SCRIPT') document.getElementById('err').style.display = 'flex'; }, true);
+</script>
+</body>
+</html>
